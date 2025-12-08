@@ -22,3 +22,12 @@ add_library(Engine ${ENGINE_SOURCES})
 
 # Mirror folder structure in Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
+
+# Create executable target
+add_executable(TestApp Test/main.cpp)
+
+# Link the Engine library
+target_link_libraries(TestApp Engine)
+
+# Make App the startup project in Visual Studio
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT TestApp)
