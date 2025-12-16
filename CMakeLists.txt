@@ -10,17 +10,22 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Collect sources
 file(GLOB_RECURSE ENGINE_SOURCES
-    "Engine/include/Math/*.h"
-    "Engine/include/Renderer/*.h"
-    "Engine/include/Platform/*.h"
-    "Engine/include/Utils/*.h"
-    "Engine/src/Math/*.cpp"
-    "Engine/src/Renderer/*.cpp"
-    "Engine/src/Platform/*.cpp"
-    "Engine/src/Utils/*.cpp"
+    "Engine/include/math/*.h"
+    "Engine/include/renderer/*.h"
+    "Engine/include/platform/*.h"
+    "Engine/include/utils/*.h"
+    "Engine/src/math/*.cpp"
+    "Engine/src/renderer/*.cpp"
+    "Engine/src/platform/*.cpp"
+    "Engine/src/utils/*.cpp"
 )
 
 add_library(Engine ${ENGINE_SOURCES})
+
+target_include_directories(Engine
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
+)
 
 # Mirror folder structure in Visual Studio
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})

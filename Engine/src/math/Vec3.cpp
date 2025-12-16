@@ -1,3 +1,3 @@
 // Vec3 implementation
 
-#include "../public/Vec3.h"
+#include "math/Vec3.h"

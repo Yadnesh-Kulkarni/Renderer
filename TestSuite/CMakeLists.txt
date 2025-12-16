@@ -8,18 +8,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Add gtest source files directly into your test target
-file(GLOB GTEST_SRC
-    ${googletest_SOURCE_DIR}/googletest/src/*.cc
-    ${googletest_SOURCE_DIR}/googlemock/src/*.cc
-)
+enable_testing()
 
-add_executable(unit_tests src/test_main.cpp ${GTEST_SRC})
-target_include_directories(unit_tests PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../Engine/include
-    ${googletest_SOURCE_DIR}
-    ${googletest_SOURCE_DIR}/googlemock/include
-    ${googletest_SOURCE_DIR}/googletest/include
+add_executable(unit_tests src/test_main.cpp)
+target_link_libraries(unit_tests
+    PRIVATE
+        Engine
+        gtest_main
+        gmock_main
+)
+target_include_directories(unit_tests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../Engine/include
 )
 set_target_properties(unit_tests PROPERTIES FOLDER "TestSuite")
 
