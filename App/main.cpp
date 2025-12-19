@@ -1,9 +1,12 @@
 #include <iostream>
-#include "math/Vec3.h"
+#include "renderer/Renderer.h"
 
-int main(int argc, char **argv)
-{
-	std::cout << "Test App";
-	Vector3D vec;
-	return 0;
+int main() {
+    
+    Renderer renderer;
+
+	renderer.Initialize();
+	renderer.GameLoop();
+
+    return 0;
 }

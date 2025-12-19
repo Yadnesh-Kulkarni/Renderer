@@ -6,11 +6,20 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+
+find_package(Vulkan REQUIRED)
+
+# Option to build tests (disabled by default)
+option(BUILD_TESTS "Build the test suite" OFF)
+
+# Add libs directory as a library search path
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
 ####################ENGINE##############################
 
 # Collect sources
 file(GLOB_RECURSE ENGINE_SOURCES
-    "Engine/include/math/*.h"
+    "Engine/include/math/Dev/*.h"
     "Engine/include/renderer/*.h"
     "Engine/include/platform/*.h"
     "Engine/include/utils/*.h"
@@ -27,8 +36,10 @@ target_include_directories(Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
 )
 
-# Mirror folder structure in Visual Studio
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
+# Mirror folder structure in Visual Studio (harmless on other platforms)
+if(MSVC)
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
+endif()
 
 ##########################APP############################
 
@@ -36,14 +47,28 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ENGINE_SOURCES})
 add_executable(TestApp App/main.cpp)
 
 # Link the Engine library
-target_link_libraries(TestApp Engine)
+target_link_libraries(TestApp 
+    PRIVATE
+        Engine
+)
 
 target_include_directories(TestApp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
 )
 
-# Make App the startup project in Visual Studio
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT TestApp)
 
-add_subdirectory(TestSuite)
+include_directories(${Vulkan_INCLUDE_DIRS})
+target_link_libraries(TestApp PRIVATE Vulkan::Vulkan)
+target_link_options(TestApp PRIVATE "/NODEFAULTLIB:MSVCRT")
+
+# Make App the startup project in Visual Studio (harmless on other platforms)
+if(MSVC)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT TestApp)
+endif()
+
+# Build tests only if BUILD_TESTS option is enabled
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(TestSuite)
+endif()

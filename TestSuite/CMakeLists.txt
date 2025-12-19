@@ -8,9 +8,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
 add_executable(unit_tests src/test_main.cpp)
+
+# Link the Engine library
 target_link_libraries(unit_tests
     PRIVATE
         Engine
@@ -21,7 +21,10 @@ target_include_directories(unit_tests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../Engine/include
 )
-set_target_properties(unit_tests PROPERTIES FOLDER "TestSuite")
+# Set Visual Studio folder organization (harmless on other platforms)
+if(MSVC)
+    set_target_properties(unit_tests PROPERTIES FOLDER "TestSuite")
+endif()
 
 # Enable test discovery
 include(GoogleTest)
