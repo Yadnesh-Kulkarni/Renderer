@@ -12,7 +12,7 @@
 class Renderer {
 private:
     VkInstance vkInstance;
-    std::vector<VkExtensionProperties> instanceExtensions; 
+    GEVulkanValidationLayer vkValidationLayer;
 public:
 
     Renderer();
