@@ -21,11 +21,13 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 file(GLOB_RECURSE ENGINE_SOURCES
     "Engine/include/math/Dev/*.h"
     "Engine/include/renderer/*.h"
+    "Engine/include/renderer/Vulkan/*.h"
     "Engine/include/platform/*.h"
     "Engine/include/utils/*.h"
     "Engine/include/core/*.h"
     "Engine/include/common/*.h"
     "Engine/src/math/*.cpp"
+    "Engine/src/renderer/Vulkan/*.cpp"
     "Engine/src/renderer/*.cpp"
     "Engine/src/platform/*.cpp"
     "Engine/src/utils/*.cpp"
@@ -37,6 +39,11 @@ add_library(Engine ${ENGINE_SOURCES})
 target_include_directories(Engine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
+)
+
+target_compile_definitions(Engine
+    PRIVATE
+        $<$<CONFIG:Debug>:ENGINE_DEBUG>
 )
 
 # Mirror folder structure in Visual Studio (harmless on other platforms)

@@ -2,6 +2,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "common/common.h"
+#include "renderer/Vulkan/GEVulkanValidationLayer.h"
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 //#include "math/GLM/vec4.hpp"
@@ -18,5 +19,7 @@ public:
     ~Renderer();
 
     void Initialize(GERequiredExtensions requiredExtensions);
+    void Cleanup();
+
     void PrintInstanceExtensions();
 };

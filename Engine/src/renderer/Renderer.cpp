@@ -23,16 +23,34 @@ void Renderer::Initialize(GERequiredExtensions requiredExtensions)
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0 ,0);
     appInfo.apiVersion = VK_API_VERSION_1_4;
 
+    GEVulkanValidationLayer vkValidationLayer;
+
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
     createInfo.enabledExtensionCount = requiredExtensions.count;
     createInfo.ppEnabledExtensionNames = requiredExtensions.extensions;
-    createInfo.enabledLayerCount = 0;
+    if(vkValidationLayer.IsValidationLayerEnabled() && !vkValidationLayer.CheckForValidationSupport())
+    {
+        createInfo.enabledLayerCount = vkValidationLayer.GetValidationLayersCount();
+        createInfo.ppEnabledLayerNames = vkValidationLayer.GetValidationLayers();
+    }
+    else
+    {
+        createInfo.enabledLayerCount = 0;
+    }
 
     if(vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS)
     {
         std::runtime_error("Unable to create Vulkan Instance");
+    }
+}
+
+void Renderer::Cleanup()
+{
+    if(vkInstance)
+    {
+        vkDestroyInstance(vkInstance, nullptr);
     }
 }
 
