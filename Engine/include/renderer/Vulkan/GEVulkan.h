@@ -1,7 +1,9 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <memory>
 #include "renderer/Renderer.h"
 #include "renderer/Vulkan/GEVulkanValidationLayer.h"
+#include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -11,10 +13,13 @@
 class VulkanRenderer : public Renderer{
 private:
 	VkInstance vkInstance;
+   
     GEVulkanValidationLayer vkValidationLayer;
     GERequiredExtensions requiredExtensions;
+	std::unique_ptr<GEVulkanPhysicalDevice> vkPhysicalDevice;
 
     void CreateInstance();
+
 protected:
     virtual void BeginFrame();
     virtual void EndFrame();

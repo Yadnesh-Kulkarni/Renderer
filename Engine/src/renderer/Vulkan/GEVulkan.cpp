@@ -50,6 +50,7 @@ void VulkanRenderer::CreateInstance()
 
 VulkanRenderer::VulkanRenderer()
 {
+	vkPhysicalDevice = std::make_unique<GEVulkanPhysicalDevice>();
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -59,6 +60,7 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Initialize()
 {
 	CreateInstance();
+	vkPhysicalDevice->pickPhysicalDevice(vkInstance, nullptr);
 }
 
 void VulkanRenderer::Cleanup()
