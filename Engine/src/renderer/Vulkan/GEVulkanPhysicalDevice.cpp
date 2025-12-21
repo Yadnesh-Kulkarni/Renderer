@@ -12,15 +12,12 @@ int GEVulkanPhysicalDevice::rateDeviceSuitablity(VkPhysicalDevice device)
 
 	int score = 0;
 
-    // Discrete GPUs have a significant performance advantage
     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
         score += 1000;
     }
 
-    // Maximum possible size of textures affects graphics quality
     score += deviceProperties.limits.maxImageDimension2D;
 
-    // Application can't function without geometry shaders
     if (!deviceFeatures.geometryShader) {
         return 0;
     }
@@ -30,9 +27,8 @@ int GEVulkanPhysicalDevice::rateDeviceSuitablity(VkPhysicalDevice device)
 
 QueueFamilyIndices GEVulkanPhysicalDevice::findQueueFamilies(VkPhysicalDevice device)
 {
-	 QueueFamilyIndices indices;
-    // Logic to find queue family indices to populate struct with
-	 uint32_t queueFamilyCount = 0;
+	QueueFamilyIndices indices;
+	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
 	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
@@ -78,11 +74,14 @@ void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance, VkPhysicalD
 		}
 	}
 
-	 if (candidates.rbegin()->first > 0) {
+	 if (candidates.rbegin()->first > 0) 
+	 {
         m_vkPhysicalDevice = candidates.rbegin()->second;
-    } else {
+     } 
+	 else 
+	 {
         throw std::runtime_error("failed to find a suitable GPU!");
-    }
+     }
 }
 
 

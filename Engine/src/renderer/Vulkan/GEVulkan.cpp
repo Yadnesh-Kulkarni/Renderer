@@ -61,10 +61,24 @@ void VulkanRenderer::Initialize()
 {
 	CreateInstance();
 	vkPhysicalDevice->pickPhysicalDevice(vkInstance, nullptr);
+	vkLogicalDevice = std::make_unique<GEVulkanLogicalDevice>(*vkPhysicalDevice);
+	vkLogicalDevice->createLogicalDevice();
 }
 
 void VulkanRenderer::Cleanup()
 {
+    if(vkPhysicalDevice)
+    {
+		vkPhysicalDevice->Cleanup();
+		vkPhysicalDevice.reset();
+	}
+
+    if(vkLogicalDevice)
+    {
+		vkLogicalDevice->cleanUp();
+		vkLogicalDevice.reset();
+	}
+
     if (vkValidationLayer.IsValidationLayerEnabled()) {
        vkValidationLayer.DestroyDebugUtilsMessengerEXT(vkInstance, nullptr);
     }
