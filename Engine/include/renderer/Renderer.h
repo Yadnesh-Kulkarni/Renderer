@@ -1,25 +1,21 @@
+#pragma once
 // Renderer header
-#include <vulkan/vulkan.h>
 #include <vector>
 #include "common/common.h"
 #include "renderer/Vulkan/GEVulkanValidationLayer.h"
-//#define GLM_FORCE_RADIANS
-//#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-//#include "math/GLM/vec4.hpp"
-//#include "math/GLM/mat4x4.hpp"
 
 
 class Renderer {
-private:
-    VkInstance vkInstance;
-    GEVulkanValidationLayer vkValidationLayer;
 public:
+    Renderer()  {}
+    ~Renderer() = default;
 
-    Renderer();
-    ~Renderer();
+    virtual void BeginFrame() = 0;
+    virtual void EndFrame() = 0;
 
-    void Initialize(GERequiredExtensions requiredExtensions);
-    void Cleanup();
+    virtual void SwapBuffers() = 0;
+    virtual void Initialize() = 0;
+    virtual void Cleanup() = 0;
 
-    void PrintInstanceExtensions();
+    virtual void SetRequiredExtensions(GERequiredExtensions* pRequiredExtensions) {};
 };

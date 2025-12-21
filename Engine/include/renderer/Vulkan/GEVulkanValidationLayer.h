@@ -2,9 +2,6 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-struct GEValidationLayerInfo{
-};
-
 class GEVulkanValidationLayer {
 private:
 	bool bEnableValidationLayer;

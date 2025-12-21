@@ -11,7 +11,7 @@ private:
     GLFWwindow* window;
 public:
        WindowCreator();
-       ~WindowCreator();
+       ~WindowCreator() = default;
        void createWindow(int width, int height, const char* title);
        void destroyWindow();
 

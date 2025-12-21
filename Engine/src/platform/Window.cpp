@@ -13,11 +13,6 @@ WindowCreator::WindowCreator()
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 }
 
-WindowCreator::~WindowCreator()
-{
-    glfwTerminate();
-}
-
 void WindowCreator::createWindow(int width, int height, const char* title)
 {
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);

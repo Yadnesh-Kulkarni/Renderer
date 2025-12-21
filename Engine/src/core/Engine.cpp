@@ -1,18 +1,15 @@
 #include "core/Engine.h"
+#include "renderer/Vulkan/GEVulkan.h"
 
 EngineCore::EngineCore()
 {
-	window = new WindowCreator();
-	renderer = new Renderer();
+	renderer = std::make_unique<VulkanRenderer>();
+    window = std::make_unique<WindowCreator>();
 }
 
 EngineCore::~EngineCore()
 {
-	if(window)
-    {
-        window->destroyWindow();
-        delete window;
-    }
+
 }
 
 void EngineCore::Run()
@@ -21,10 +18,13 @@ void EngineCore::Run()
 
     GERequiredExtensions extensionInfo;
     window->getRequiredExtensions(&extensionInfo);
-    renderer->Initialize(extensionInfo);
+	renderer->SetRequiredExtensions(&extensionInfo);
+    renderer->Initialize();
 
     while(!window->shouldClose())
     {
         window->pollEvents();
     }
+
+    renderer->Cleanup();
 }
