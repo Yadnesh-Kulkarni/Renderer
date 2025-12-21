@@ -23,10 +23,13 @@ file(GLOB_RECURSE ENGINE_SOURCES
     "Engine/include/renderer/*.h"
     "Engine/include/platform/*.h"
     "Engine/include/utils/*.h"
+    "Engine/include/core/*.h"
+    "Engine/include/common/*.h"
     "Engine/src/math/*.cpp"
     "Engine/src/renderer/*.cpp"
     "Engine/src/platform/*.cpp"
     "Engine/src/utils/*.cpp"
+    "Engine/src/core/*.cpp"
 )
 
 add_library(Engine ${ENGINE_SOURCES})

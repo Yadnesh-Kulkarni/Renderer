@@ -1,12 +1,10 @@
 #include <iostream>
-#include "renderer/Renderer.h"
+#include "core/Engine.h"
 
 int main() {
-    
-    Renderer renderer;
+    EngineCore engine;
 
-	renderer.Initialize();
-	renderer.GameLoop();
+    engine.Run();
 
     return 0;
 }

@@ -31,11 +31,19 @@ void WindowCreator::destroyWindow()
     glfwDestroyWindow(window);
 }
 
+void WindowCreator::getRequiredExtensions(GERequiredExtensions *pRequiredExtensions)
+{
+    pRequiredExtensions->extensions = glfwGetRequiredInstanceExtensions(&pRequiredExtensions->count);
+}
+
+bool WindowCreator::shouldClose()
+{
+    return glfwWindowShouldClose(window);
+}
+
 void WindowCreator::pollEvents()
 {
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-    }
+    glfwPollEvents();
 }
 
 void WindowCreator::swapBuffers()
