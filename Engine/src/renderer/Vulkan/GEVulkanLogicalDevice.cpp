@@ -29,6 +29,8 @@ void GEVulkanLogicalDevice::createLogicalDevice()
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.queueCreateInfoCount = queueCreateInfos.size();
 	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.enabledExtensionCount = m_vkPhysicalDevice->GetDeviceExtensionCount();
+	createInfo.ppEnabledExtensionNames = m_vkPhysicalDevice->GetDeviceExtensions();
 
 	if (vkCreateDevice(m_vkPhysicalDevice->GetPhysicalDevice(), &createInfo, nullptr, &m_vkDevice) != VK_SUCCESS) 
 	{

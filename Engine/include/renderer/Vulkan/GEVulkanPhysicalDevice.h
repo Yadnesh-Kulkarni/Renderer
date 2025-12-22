@@ -8,10 +8,11 @@ class GEVulkanPhysicalDevice {
 private:
 	GEVulkanSurfaceView m_vkSurfaceView;
 	VkPhysicalDevice m_vkPhysicalDevice = VK_NULL_HANDLE;
-	QueueFamilyIndices m_queueFamilyIndices {};
+
+	GEPhysicalDeviceDetails m_deviceDetails{};
 
 	int rateDeviceSuitablity(VkPhysicalDevice device);
-	bool isDeviceSuitable(VkPhysicalDevice device, QueueFamilyIndices& indices);
+	bool isDeviceSuitable(VkPhysicalDevice device, GEPhysicalDeviceDetails& indices);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
@@ -19,19 +20,24 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
+	SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
 public:
 	
     GEVulkanPhysicalDevice(const GEVulkanPhysicalDevice& other)
         : m_vkSurfaceView(other.m_vkSurfaceView),
-          m_vkPhysicalDevice(other.m_vkPhysicalDevice),
-          m_queueFamilyIndices(other.m_queueFamilyIndices) {}
+          m_vkPhysicalDevice(other.m_vkPhysicalDevice) {}
 
 	GEVulkanPhysicalDevice(const GEVulkanSurfaceView& view) : m_vkSurfaceView(view) {};
 	~GEVulkanPhysicalDevice() = default;
 
+	uint32_t GetDeviceExtensionCount() { return static_cast<uint32_t>(deviceExtensions.size()); }
+	const char* const* GetDeviceExtensions() { return deviceExtensions.data(); }
+
+
 	void pickPhysicalDevice(VkInstance instance);
 	const VkPhysicalDevice GetPhysicalDevice() { return m_vkPhysicalDevice; }
 
-	const QueueFamilyIndices GetQueueFamilyIndices() { return m_queueFamilyIndices; }
+	const QueueFamilyIndices GetQueueFamilyIndices() { return m_deviceDetails.queueFamilyIndices; }
+	const SwapchainSupportDetails GetSwapchainSupportDetails() { return m_deviceDetails.swapchainSupportDetails; }
 	void Cleanup();
 };

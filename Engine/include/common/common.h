@@ -6,3 +6,9 @@ struct GERequiredExtensions
     uint32_t count;
     const char **extensions;
 };
+
+struct GEFramebufferSize
+{
+	int width;
+	int height;
+};

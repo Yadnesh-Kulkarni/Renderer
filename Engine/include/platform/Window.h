@@ -18,6 +18,7 @@ public:
        void destroyWindow();
 
        void getRequiredExtensions(GERequiredExtensions *pRequiredExtensions);
+	   GEFramebufferSize getFramebufferSize();
 
        bool shouldClose();
        void pollEvents();

@@ -69,10 +69,19 @@ void VulkanRenderer::Initialize()
 
 	vkLogicalDevice = std::make_unique<GEVulkanLogicalDevice>(vkPhysicalDevice.get());
 	vkLogicalDevice->createLogicalDevice();
+
+	GEFramebufferSize fbSize = m_window->getFramebufferSize();
+	vkSwapChain = std::make_unique<GEVulkanSwapChain>(vkPhysicalDevice.get(), vkLogicalDevice.get() , vkSurfaceView.get(), fbSize.width, fbSize.height);
+	vkSwapChain->CreateSwapChain();
 }
 
 void VulkanRenderer::Cleanup()
 {
+	if (vkSwapChain)
+	{
+		vkSwapChain->Cleanup();
+		vkSwapChain.reset();
+    }
     if(vkSurfaceView)
     {
 		vkSurfaceView->Cleanup();

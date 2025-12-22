@@ -54,11 +54,48 @@ QueueFamilyIndices GEVulkanPhysicalDevice::findQueueFamilies(VkPhysicalDevice de
     return indices;
 }
 
-bool GEVulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device, QueueFamilyIndices& deviceIndices)
+SwapchainSupportDetails GEVulkanPhysicalDevice::querySwapchainSupport(VkPhysicalDevice device)
 {
-	deviceIndices = findQueueFamilies(device);
+	SwapchainSupportDetails details;
+
+	// Device Surface Capabilities
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_vkSurfaceView.getSurfaceView(), &details.surfaceCapabilities);
+	
+	// Device Surface Formats
+	uint32_t formatCount;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_vkSurfaceView.getSurfaceView(), &formatCount, nullptr);
+
+
+	if (formatCount != 0) {
+		details.formats.resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_vkSurfaceView.getSurfaceView(), &formatCount, details.formats.data());
+	}
+
+	// Device Present Modes
+	uint32_t presentModeCount;
+
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_vkSurfaceView.getSurfaceView(), &presentModeCount, nullptr);
+	if (presentModeCount != 0) {
+		details.presentModes.resize(presentModeCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_vkSurfaceView.getSurfaceView(), &presentModeCount, details.presentModes.data());
+	}
+
+
+	return details;
+}
+
+bool GEVulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device, GEPhysicalDeviceDetails& details)
+{
+	details.queueFamilyIndices = findQueueFamilies(device);
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
-    return deviceIndices.isComplete() && extensionsSupported;
+	bool swapChainAdequate = false;
+	if(extensionsSupported)
+	{
+		details.swapchainSupportDetails = querySwapchainSupport(device);
+		swapChainAdequate = !details.swapchainSupportDetails.formats.empty() && !details.swapchainSupportDetails.presentModes.empty();
+	}
+
+    return details.queueFamilyIndices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
 bool GEVulkanPhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
@@ -87,20 +124,20 @@ void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance)
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 	
-	std::multimap<int, std::pair<VkPhysicalDevice, QueueFamilyIndices>> candidates;
+	std::multimap<int, std::pair<VkPhysicalDevice, GEPhysicalDeviceDetails>> candidates;
 	for (const auto& device : devices) {
-		QueueFamilyIndices indices;
-		if(isDeviceSuitable(device, indices))
+		GEPhysicalDeviceDetails deviceDetails;
+		if(isDeviceSuitable(device, deviceDetails))
 		{
 			int score = rateDeviceSuitablity(device);
-			candidates.insert(std::make_pair(score, std::make_pair(device, indices)));
+			candidates.insert(std::make_pair(score, std::make_pair(device, deviceDetails)));
 		}
 	}
 
 	 if (candidates.rbegin()->first > 0) 
 	 {
 		m_vkPhysicalDevice = candidates.rbegin()->second.first;
-		m_queueFamilyIndices = candidates.rbegin()->second.second;
+		m_deviceDetails = candidates.rbegin()->second.second;
      } 
 	 else 
 	 {

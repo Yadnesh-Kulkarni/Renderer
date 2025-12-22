@@ -31,6 +31,13 @@ void WindowCreator::getRequiredExtensions(GERequiredExtensions *pRequiredExtensi
     pRequiredExtensions->extensions = glfwGetRequiredInstanceExtensions(&pRequiredExtensions->count);
 }
 
+GEFramebufferSize WindowCreator::getFramebufferSize()
+{
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    return { width, height };
+}
+
 bool WindowCreator::shouldClose()
 {
     return glfwWindowShouldClose(m_window);
