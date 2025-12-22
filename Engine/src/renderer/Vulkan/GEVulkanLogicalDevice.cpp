@@ -5,7 +5,7 @@
 
 void GEVulkanLogicalDevice::createLogicalDevice()
 {
-	QueueFamilyIndices indices = m_vkPhysicalDevice.findQueueFamilies(m_vkPhysicalDevice.GetPhysicalDevice());
+	QueueFamilyIndices indices = m_vkPhysicalDevice->GetQueueFamilyIndices();
 
 	VkDeviceQueueCreateInfo queueCreateInfo{};
 	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -23,7 +23,7 @@ void GEVulkanLogicalDevice::createLogicalDevice()
 	createInfo.queueCreateInfoCount = 1;
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	if (vkCreateDevice(m_vkPhysicalDevice.GetPhysicalDevice(), &createInfo, nullptr, &m_vkDevice) != VK_SUCCESS) 
+	if (vkCreateDevice(m_vkPhysicalDevice->GetPhysicalDevice(), &createInfo, nullptr, &m_vkDevice) != VK_SUCCESS) 
 	{
 		throw std::runtime_error("failed to create logical device!");
 	}

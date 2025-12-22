@@ -48,9 +48,9 @@ void VulkanRenderer::CreateInstance()
     vkValidationLayer.SetupDebugMessenger(vkInstance);
 }
 
-VulkanRenderer::VulkanRenderer()
+VulkanRenderer::VulkanRenderer(WindowCreator* window) : Renderer(window)
 {
-	vkPhysicalDevice = std::make_unique<GEVulkanPhysicalDevice>();
+	
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -60,13 +60,25 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Initialize()
 {
 	CreateInstance();
-	vkPhysicalDevice->pickPhysicalDevice(vkInstance, nullptr);
-	vkLogicalDevice = std::make_unique<GEVulkanLogicalDevice>(*vkPhysicalDevice);
+
+    vkSurfaceView = std::make_unique<GEVulkanSurfaceView>(vkInstance);
+	vkSurfaceView->CreateSurface(m_window);
+
+    vkPhysicalDevice = std::make_unique<GEVulkanPhysicalDevice>(*vkSurfaceView);
+	vkPhysicalDevice->pickPhysicalDevice(vkInstance);
+
+	vkLogicalDevice = std::make_unique<GEVulkanLogicalDevice>(vkPhysicalDevice.get());
 	vkLogicalDevice->createLogicalDevice();
 }
 
 void VulkanRenderer::Cleanup()
 {
+    if(vkSurfaceView)
+    {
+		vkSurfaceView->Cleanup();
+        vkSurfaceView.reset();
+	}
+
     if(vkPhysicalDevice)
     {
 		vkPhysicalDevice->Cleanup();

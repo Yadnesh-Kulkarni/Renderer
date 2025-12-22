@@ -41,20 +41,25 @@ QueueFamilyIndices GEVulkanPhysicalDevice::findQueueFamilies(VkPhysicalDevice de
 			indices.graphicsFamily = i;
 		}
 
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i , m_vkSurfaceView.getSurfaceView(), &presentSupport);
+		if (presentSupport) {
+			indices.presentFamily = i;
+		}
+
 		i++;
 	}
 
     return indices;
 }
 
-bool GEVulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device)
+bool GEVulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device, QueueFamilyIndices& deviceIndices)
 {
-	QueueFamilyIndices indices = findQueueFamilies(device);
-
-    return indices.graphicsFamily.has_value();
+	deviceIndices = findQueueFamilies(device);
+    return deviceIndices.isComplete();
 }
 
-void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance, VkPhysicalDevice* physicalDevice)
+void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance)
 {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -65,23 +70,30 @@ void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance, VkPhysicalD
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 	
-	std::multimap<int, VkPhysicalDevice> candidates;
+	std::multimap<int, std::pair<VkPhysicalDevice, QueueFamilyIndices>> candidates;
 	for (const auto& device : devices) {
-		if(isDeviceSuitable(device))
+		QueueFamilyIndices indices;
+		if(isDeviceSuitable(device, indices))
 		{
 			int score = rateDeviceSuitablity(device);
-			candidates.insert(std::make_pair(score, device));
+			candidates.insert(std::make_pair(score, std::make_pair(device, indices)));
 		}
 	}
 
 	 if (candidates.rbegin()->first > 0) 
 	 {
-        m_vkPhysicalDevice = candidates.rbegin()->second;
+		m_vkPhysicalDevice = candidates.rbegin()->second.first;
+		m_queueFamilyIndices = candidates.rbegin()->second.second;
      } 
 	 else 
 	 {
         throw std::runtime_error("failed to find a suitable GPU!");
      }
+}
+
+void GEVulkanPhysicalDevice::Cleanup()
+{
+	m_vkPhysicalDevice = VK_NULL_HANDLE;
 }
 
 

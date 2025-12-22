@@ -6,9 +6,9 @@ class GEVulkanLogicalDevice{
 private:
 	VkDevice m_vkDevice = VK_NULL_HANDLE;
 	VkQueue m_vkGraphicsQueue = VK_NULL_HANDLE;
-	GEVulkanPhysicalDevice m_vkPhysicalDevice;
+	GEVulkanPhysicalDevice* m_vkPhysicalDevice;
 public:
-	GEVulkanLogicalDevice(GEVulkanPhysicalDevice device) { m_vkDevice = VK_NULL_HANDLE; m_vkPhysicalDevice = device; } 
+	GEVulkanLogicalDevice(GEVulkanPhysicalDevice* device) : m_vkPhysicalDevice(device) { m_vkDevice = VK_NULL_HANDLE; }
 	~GEVulkanLogicalDevice() = default;
 
 	void createLogicalDevice();

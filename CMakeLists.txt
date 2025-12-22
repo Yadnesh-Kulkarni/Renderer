@@ -22,6 +22,7 @@ file(GLOB_RECURSE ENGINE_SOURCES
     "Engine/include/math/Dev/*.h"
     "Engine/include/renderer/*.h"
     "Engine/include/renderer/Vulkan/*.h"
+    "Engine/include/renderer/Vulkan/common/*.h"
     "Engine/include/platform/*.h"
     "Engine/include/utils/*.h"
     "Engine/include/core/*.h"

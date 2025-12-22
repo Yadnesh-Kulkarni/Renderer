@@ -1,10 +1,11 @@
 #pragma once
-#include <vulkan/vulkan.h>
 #include <memory>
+#include <vulkan/vulkan.h>
 #include "renderer/Renderer.h"
 #include "renderer/Vulkan/GEVulkanValidationLayer.h"
 #include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
 #include "renderer/Vulkan/GEVulkanLogicalDevice.h"
+#include "renderer/Vulkan/GEVulkanSurfaceView.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -19,6 +20,7 @@ private:
     GERequiredExtensions requiredExtensions;
 	std::unique_ptr<GEVulkanPhysicalDevice> vkPhysicalDevice;
 	std::unique_ptr<GEVulkanLogicalDevice> vkLogicalDevice;
+	std::unique_ptr<GEVulkanSurfaceView> vkSurfaceView;
     void CreateInstance();
 protected:
     virtual void BeginFrame();
@@ -28,7 +30,7 @@ protected:
 
     void PrintInstanceExtensions();
 public:
-    VulkanRenderer();
+    VulkanRenderer(WindowCreator* window);
     ~VulkanRenderer();
 
     virtual void Initialize();

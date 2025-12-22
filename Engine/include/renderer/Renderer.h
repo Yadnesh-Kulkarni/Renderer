@@ -3,11 +3,13 @@
 #include <vector>
 #include "common/common.h"
 #include "renderer/Vulkan/GEVulkanValidationLayer.h"
-
+#include "platform/Window.h"
 
 class Renderer {
+protected:
+    WindowCreator* m_window;
 public:
-    Renderer()  {}
+    Renderer(WindowCreator* window)  { m_window = window; }
     ~Renderer() = default;
 
     virtual void BeginFrame() = 0;

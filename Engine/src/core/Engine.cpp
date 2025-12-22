@@ -3,8 +3,8 @@
 
 EngineCore::EngineCore()
 {
-	renderer = std::make_unique<VulkanRenderer>();
     window = std::make_unique<WindowCreator>();
+    renderer = std::make_unique<VulkanRenderer>(window.get());
 }
 
 EngineCore::~EngineCore()

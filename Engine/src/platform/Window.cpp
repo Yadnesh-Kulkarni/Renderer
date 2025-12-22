@@ -15,15 +15,15 @@ WindowCreator::WindowCreator()
 
 void WindowCreator::createWindow(int width, int height, const char* title)
 {
-    window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-    if(!window){
+    m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+    if(!m_window){
         throw std::runtime_error("Failed to create window");
     }
 }
 
 void WindowCreator::destroyWindow()
 {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(m_window);
 }
 
 void WindowCreator::getRequiredExtensions(GERequiredExtensions *pRequiredExtensions)
@@ -33,7 +33,7 @@ void WindowCreator::getRequiredExtensions(GERequiredExtensions *pRequiredExtensi
 
 bool WindowCreator::shouldClose()
 {
-    return glfwWindowShouldClose(window);
+    return glfwWindowShouldClose(m_window);
 }
 
 void WindowCreator::pollEvents()
@@ -43,5 +43,5 @@ void WindowCreator::pollEvents()
 
 void WindowCreator::swapBuffers()
 {
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(m_window);
 }
