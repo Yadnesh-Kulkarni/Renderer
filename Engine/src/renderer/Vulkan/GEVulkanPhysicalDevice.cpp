@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
 
 int GEVulkanPhysicalDevice::rateDeviceSuitablity(VkPhysicalDevice device)
@@ -56,7 +57,23 @@ QueueFamilyIndices GEVulkanPhysicalDevice::findQueueFamilies(VkPhysicalDevice de
 bool GEVulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device, QueueFamilyIndices& deviceIndices)
 {
 	deviceIndices = findQueueFamilies(device);
-    return deviceIndices.isComplete();
+	bool extensionsSupported = checkDeviceExtensionSupport(device);
+    return deviceIndices.isComplete() && extensionsSupported;
+}
+
+bool GEVulkanPhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
+{
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+	for (const auto& extension : availableExtensions) {
+		requiredExtensions.erase(extension.extensionName);
+	}
+
+	return requiredExtensions.empty();
 }
 
 void GEVulkanPhysicalDevice::pickPhysicalDevice(VkInstance instance)

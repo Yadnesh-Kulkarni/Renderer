@@ -4,11 +4,6 @@
 #include "renderer/Vulkan/GEVulkanLogicalDevice.h"
 #include "renderer/Vulkan/common/GEVulkancommon.h"
 
-VkQueue GEVulkanLogicalDevice::CreateVkQueue(uint32_t queueFamilyIndex)
-{
-	return VkQueue();
-}
-
 void GEVulkanLogicalDevice::createLogicalDevice()
 {
 	QueueFamilyIndices indices = m_vkPhysicalDevice->GetQueueFamilyIndices();
