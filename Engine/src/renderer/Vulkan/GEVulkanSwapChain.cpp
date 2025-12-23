@@ -38,6 +38,22 @@ void GEVulkanSwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabil
 	}
 }
 
+void GEVulkanSwapChain::CreateImageViews(uint32_t imageCount)
+{
+	vkGetSwapchainImagesKHR(m_logicalDevice->getVkDevice(), m_vkSwapChain, &imageCount, nullptr);
+	m_vkSwapChainImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(m_logicalDevice->getVkDevice(), m_vkSwapChain, &imageCount, m_vkSwapChainImages.data());
+
+	m_vkSwapChainImageViews.resize(m_vkSwapChainImages.size());
+
+	for (size_t i = 0; i < m_vkSwapChainImages.size(); i++)
+	{
+		GEVulkanImageView imageView;
+		imageView = imageView.CreateImageView(m_logicalDevice->getVkDevice(), m_vkSwapChainImages[i], m_vkSurfaceFormat.format);
+		m_vkSwapChainImageViews[i] = imageView;
+	}
+}
+
 void GEVulkanSwapChain::CreateSwapChain()
 {
 	SwapchainSupportDetails swapchainSupport = m_physicalDevice->GetSwapchainSupportDetails();
@@ -91,13 +107,15 @@ void GEVulkanSwapChain::CreateSwapChain()
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(m_logicalDevice->getVkDevice(), m_vkSwapChain, &imageCount, nullptr);
-	m_vkSwapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(m_logicalDevice->getVkDevice(), m_vkSwapChain, &imageCount, m_vkSwapChainImages.data());
+	CreateImageViews(imageCount);
 }
 
 void GEVulkanSwapChain::Cleanup()
 {
+	for (auto imageView : m_vkSwapChainImageViews) {
+		imageView.Cleanup(m_logicalDevice->getVkDevice());
+    }
+
 	if (m_vkSwapChain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR(m_logicalDevice->getVkDevice(), m_vkSwapChain, nullptr);

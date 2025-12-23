@@ -3,6 +3,7 @@
 #include <vector>
 #include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
 #include "renderer/Vulkan/GEVulkanLogicalDevice.h"
+#include "renderer/Vulkan/GEVulkanImageView.h"
 
 class GEVulkanSwapChain {
 private:
@@ -20,11 +21,12 @@ private:
 	GEVulkanLogicalDevice* m_logicalDevice;
 
 	std::vector<VkImage> m_vkSwapChainImages;
-	std::vector<VkImageView> m_vkSwapChainImageViews;
+	std::vector<GEVulkanImageView> m_vkSwapChainImageViews;
 
 	void ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	void ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	void ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	void CreateImageViews(uint32_t imageCount);
 public:
 	GEVulkanSwapChain(GEVulkanPhysicalDevice* physicalDevice, GEVulkanLogicalDevice* logicalDevice, GEVulkanSurfaceView *surface,uint32_t width, uint32_t height) : 
 		m_physicalDevice(physicalDevice),
