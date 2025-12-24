@@ -7,6 +7,9 @@
 #include "renderer/Vulkan/GEVulkanLogicalDevice.h"
 #include "renderer/Vulkan/GEVulkanSurfaceView.h"
 #include "renderer/Vulkan/GEVulkanSwapChain.h"
+#include "renderer/Vulkan/GEVulkanFrameContext.h"
+#include "renderer/Vulkan/GEVulkanRenderPass.h"
+#include "renderer/Vulkan/GEVulkanPipeline.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -23,6 +26,10 @@ private:
 	std::unique_ptr<GEVulkanLogicalDevice> vkLogicalDevice;
 	std::unique_ptr<GEVulkanSurfaceView> vkSurfaceView;
 	std::unique_ptr<GEVulkanSwapChain> vkSwapChain;
+	std::unique_ptr<GEVulkanFrameContext> frameContext;
+	std::unique_ptr<GEVulkanRenderPass> vkRenderPass;
+	std::unique_ptr<GEVulkanPipeline> vkPipeline;
+
     void CreateInstance();
 protected:
     virtual void BeginFrame();

@@ -73,10 +73,36 @@ void VulkanRenderer::Initialize()
 	GEFramebufferSize fbSize = m_window->getFramebufferSize();
 	vkSwapChain = std::make_unique<GEVulkanSwapChain>(vkPhysicalDevice.get(), vkLogicalDevice.get() , vkSurfaceView.get(), fbSize.width, fbSize.height);
 	vkSwapChain->CreateSwapChain();
+
+	vkRenderPass = std::make_unique<GEVulkanRenderPass>(vkLogicalDevice->getVkDevice(), vkSwapChain->GetSwapChainImageFormat());
+	vkRenderPass->CreateRenderPass();
+
+	frameContext = std::make_unique<GEVulkanFrameContext>(fbSize.width, fbSize.height);
+	frameContext->CreateFrameContext();
+
+	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext);
+	vkPipeline->CreatePipeline();
 }
 
 void VulkanRenderer::Cleanup()
 {
+    if(vkPipeline)
+    {
+		vkPipeline->Cleanup();
+		vkPipeline.reset();
+	}
+
+    if(frameContext)
+    {
+		frameContext.reset();
+	}
+
+    if(vkRenderPass)
+    {
+        vkRenderPass->Cleanup();
+		vkRenderPass.reset();
+    }
+
 	if (vkSwapChain)
 	{
 		vkSwapChain->Cleanup();

@@ -37,6 +37,7 @@ public:
 
 	~GEVulkanSwapChain() = default;
 
+	VkFormat GetSwapChainImageFormat() const { return m_vkSurfaceFormat.format; }
 	void CreateSwapChain();
 	void Cleanup();
 };
