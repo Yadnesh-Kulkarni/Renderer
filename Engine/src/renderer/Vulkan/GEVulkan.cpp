@@ -80,7 +80,7 @@ void VulkanRenderer::Initialize()
 	frameContext = std::make_unique<GEVulkanFrameContext>(fbSize.width, fbSize.height);
 	frameContext->CreateFrameContext();
 
-	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext);
+	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
 	vkPipeline->CreatePipeline();
 }
 
