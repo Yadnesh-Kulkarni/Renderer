@@ -4,6 +4,8 @@
 #include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
 #include "renderer/Vulkan/GEVulkanLogicalDevice.h"
 #include "renderer/Vulkan/GEVulkanImageView.h"
+#include "renderer/Vulkan/GEVulkanRenderPass.h"
+#include "renderer/Vulkan/GEVulkanFramebuffer.h"
 
 class GEVulkanSwapChain {
 private:
@@ -19,9 +21,11 @@ private:
 	GEVulkanPhysicalDevice* m_physicalDevice;
 	GEVulkanSurfaceView* m_surfaceView;
 	GEVulkanLogicalDevice* m_logicalDevice;
+	GEVulkanRenderPass* m_renderPass = nullptr;
 
 	std::vector<VkImage> m_vkSwapChainImages;
 	std::vector<GEVulkanImageView> m_vkSwapChainImageViews;
+	std::vector<GEVulkanFramebuffer> m_vkFramebuffers;
 
 	void ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	void ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
@@ -39,5 +43,9 @@ public:
 
 	VkFormat GetSwapChainImageFormat() const { return m_vkSurfaceFormat.format; }
 	void CreateSwapChain();
+	void CreateFramebuffers();
+
 	void Cleanup();
+
+	void SetRenderPass(GEVulkanRenderPass* renderPass) { m_renderPass = renderPass; }
 };

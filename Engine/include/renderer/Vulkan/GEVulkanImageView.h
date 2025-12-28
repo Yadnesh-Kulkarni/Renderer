@@ -10,5 +10,6 @@ public:
 	~GEVulkanImageView() = default;
 
 	GEVulkanImageView CreateImageView(VkDevice device, VkImage image, VkFormat format);
+	VkImageView GetImageView() const { return m_imageView; }
 	void Cleanup(VkDevice device);
 };

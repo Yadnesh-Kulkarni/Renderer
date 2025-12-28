@@ -110,8 +110,23 @@ void GEVulkanSwapChain::CreateSwapChain()
 	CreateImageViews(imageCount);
 }
 
+void GEVulkanSwapChain::CreateFramebuffers()
+{
+	for(int i = 0; i < m_vkSwapChainImageViews.size(); i++)
+	{
+		GEVulkanFramebuffer framebuffer;
+		framebuffer.CreateFramebuffer(m_logicalDevice->getVkDevice(), m_vkExtent, m_renderPass->GetRenderPass(), m_vkSwapChainImageViews[i].GetImageView());
+		m_vkFramebuffers.push_back(framebuffer);
+	}
+}
+
 void GEVulkanSwapChain::Cleanup()
 {
+	for(auto frameBuffer : m_vkFramebuffers)
+	{
+		frameBuffer.Cleanup(m_logicalDevice->getVkDevice());
+	}
+
 	for (auto imageView : m_vkSwapChainImageViews) {
 		imageView.Cleanup(m_logicalDevice->getVkDevice());
     }

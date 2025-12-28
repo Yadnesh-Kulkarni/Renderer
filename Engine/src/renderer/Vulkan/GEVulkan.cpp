@@ -82,6 +82,9 @@ void VulkanRenderer::Initialize()
 
 	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
 	vkPipeline->CreatePipeline();
+
+	vkSwapChain->SetRenderPass(vkRenderPass.get());
+	vkSwapChain->CreateFramebuffers();
 }
 
 void VulkanRenderer::Cleanup()
