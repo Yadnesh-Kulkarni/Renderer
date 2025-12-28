@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include "renderer/Vulkan/GEVulkanLogicalDevice.h"
+#include "renderer/Vulkan/core/GEVulkanLogicalDevice.h"
 #include "renderer/Vulkan/common/GEVulkancommon.h"
 
 void GEVulkanLogicalDevice::createLogicalDevice()

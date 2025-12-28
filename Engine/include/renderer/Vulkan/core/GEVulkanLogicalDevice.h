@@ -1,6 +1,6 @@
 #pragma once
 #include <Vulkan/vulkan.h>
-#include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
+#include "renderer/Vulkan/core/GEVulkanPhysicalDevice.h"
 
 class GEVulkanLogicalDevice{
 private:

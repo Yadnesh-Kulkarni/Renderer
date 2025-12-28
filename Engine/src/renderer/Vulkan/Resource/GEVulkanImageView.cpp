@@ -1,5 +1,5 @@
 #include <iostream>
-#include "renderer/Vulkan/GEVulkanImageView.h"
+#include "renderer/Vulkan/Resources/GEVulkanImageView.h"
 
 GEVulkanImageView GEVulkanImageView::CreateImageView(VkDevice device, VkImage image, VkFormat format)
 {

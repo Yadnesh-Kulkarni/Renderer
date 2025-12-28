@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include "renderer/Vulkan/GEVulkanFramebuffer.h"
+#include "renderer/Vulkan/Resources/GEVulkanFramebuffer.h"
 
 void GEVulkanFramebuffer::CreateFramebuffer(VkDevice device, VkExtent2D extent, VkRenderPass renderPass, VkImageView imageView)
 {

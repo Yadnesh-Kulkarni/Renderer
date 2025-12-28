@@ -1,4 +1,4 @@
-#include "renderer/Vulkan/GEVulkanShader.h"
+#include "renderer/Vulkan/Resources/GEVulkanShader.h"
 
 std::vector<char> GEVulkanShader::readFile(const std::string& filename)
 {

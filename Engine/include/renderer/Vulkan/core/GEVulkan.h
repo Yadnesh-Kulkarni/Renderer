@@ -2,14 +2,14 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 #include "renderer/Renderer.h"
-#include "renderer/Vulkan/GEVulkanValidationLayer.h"
-#include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
-#include "renderer/Vulkan/GEVulkanLogicalDevice.h"
-#include "renderer/Vulkan/GEVulkanSurfaceView.h"
-#include "renderer/Vulkan/GEVulkanSwapChain.h"
-#include "renderer/Vulkan/GEVulkanFrameContext.h"
-#include "renderer/Vulkan/GEVulkanRenderPass.h"
-#include "renderer/Vulkan/GEVulkanPipeline.h"
+#include "renderer/Vulkan/core/GEVulkanValidationLayer.h"
+#include "renderer/Vulkan/core/GEVulkanPhysicalDevice.h"
+#include "renderer/Vulkan/core/GEVulkanLogicalDevice.h"
+#include "renderer/Vulkan/Surface/GEVulkanSurfaceView.h"
+#include "renderer/Vulkan/Surface/GEVulkanSwapChain.h"
+#include "renderer/Vulkan/Render/GEVulkanFrameContext.h"
+#include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
+#include "renderer/Vulkan/Render/GEVulkanPipeline.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE

@@ -2,7 +2,6 @@
 // Renderer header
 #include <vector>
 #include "common/common.h"
-#include "renderer/Vulkan/GEVulkanValidationLayer.h"
 #include "platform/Window.h"
 
 class Renderer {

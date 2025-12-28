@@ -2,9 +2,9 @@
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
-#include "renderer/Vulkan/GEVulkanShader.h"
-#include "renderer/Vulkan/GEVulkanFrameContext.h"
-#include "renderer/Vulkan/GEVulkanRenderPass.h"
+#include "renderer/Vulkan/Resources/GEVulkanShader.h"
+#include "renderer/Vulkan/Render/GEVulkanFrameContext.h"
+#include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
 
 class GEVulkanPipeline {
 

@@ -1,11 +1,11 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
-#include "renderer/Vulkan/GEVulkanLogicalDevice.h"
-#include "renderer/Vulkan/GEVulkanImageView.h"
-#include "renderer/Vulkan/GEVulkanRenderPass.h"
-#include "renderer/Vulkan/GEVulkanFramebuffer.h"
+#include "renderer/Vulkan/core/GEVulkanPhysicalDevice.h"
+#include "renderer/Vulkan/core/GEVulkanLogicalDevice.h"
+#include "renderer/Vulkan/Resources/GEVulkanImageView.h"
+#include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
+#include "renderer/Vulkan/Resources/GEVulkanFramebuffer.h"
 
 class GEVulkanSwapChain {
 private:

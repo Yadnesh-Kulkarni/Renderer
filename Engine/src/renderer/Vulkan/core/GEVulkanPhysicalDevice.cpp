@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "renderer/Vulkan/GEVulkanPhysicalDevice.h"
+#include "renderer/Vulkan/core/GEVulkanPhysicalDevice.h"
 
 int GEVulkanPhysicalDevice::rateDeviceSuitablity(VkPhysicalDevice device)
 {
