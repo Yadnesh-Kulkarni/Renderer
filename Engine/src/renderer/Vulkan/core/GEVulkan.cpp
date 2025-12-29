@@ -48,6 +48,40 @@ void VulkanRenderer::CreateInstance()
     vkValidationLayer.SetupDebugMessenger(vkInstance);
 }
 
+void VulkanRenderer::RecordCommands(uint32_t imageIndex)
+{
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	if (vkBeginCommandBuffer(frameContext->GetCommandBuffer(), &beginInfo) != VK_SUCCESS) {
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = vkRenderPass->GetRenderPass();
+	renderPassInfo.framebuffer = vkSwapChain->GetFramebuffer(imageIndex);
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = vkSwapChain->GetSwapChainExtent();
+
+	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(frameContext->GetCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(frameContext->GetCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetGraphicsPipeline());
+	vkCmdSetViewport(frameContext->GetCommandBuffer(), 0, 1, &frameContext->GetViewport());
+	vkCmdSetScissor(frameContext->GetCommandBuffer(), 0, 1, &frameContext->GetScissor());
+	vkCmdDraw(frameContext->GetCommandBuffer(), 3, 1, 0, 0);
+	vkCmdEndRenderPass(frameContext->GetCommandBuffer());
+
+	if (vkEndCommandBuffer(frameContext->GetCommandBuffer()) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
 VulkanRenderer::VulkanRenderer(WindowCreator* window) : Renderer(window)
 {
 	
@@ -85,10 +119,21 @@ void VulkanRenderer::Initialize()
 
 	vkSwapChain->SetRenderPass(vkRenderPass.get());
 	vkSwapChain->CreateFramebuffers();
+
+	vkCommandPool = std::make_unique<GEVulkanCommandPool>();
+	vkCommandPool->CreateCommandPool(vkLogicalDevice->getVkDevice(), vkPhysicalDevice->GetQueueFamilyIndices().graphicsFamily.value());
+
+	frameContext->CreateCmdBuffer(vkCommandPool->GetCommandPool(), vkLogicalDevice->getVkDevice());
 }
 
 void VulkanRenderer::Cleanup()
 {
+    if(vkCommandPool)
+    {
+		vkCommandPool->Cleanup(vkLogicalDevice->getVkDevice());
+        vkCommandPool.reset();
+	}
+
     if(vkPipeline)
     {
 		vkPipeline->Cleanup();

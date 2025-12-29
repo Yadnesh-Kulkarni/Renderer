@@ -5,6 +5,7 @@ class GEVulkanFrameContext {
 private:
 	VkViewport m_viewport;
 	VkRect2D m_scissor;
+	VkCommandBuffer	m_commandBuffer;
 
 	int m_width;
 	int m_height;
@@ -25,7 +26,9 @@ public:
 	~GEVulkanFrameContext() = default;
 
 	void CreateFrameContext();
-
+	void CreateCmdBuffer(VkCommandPool commandPool, VkDevice device);
 	VkViewport& GetViewport() { return m_viewport; }
 	VkRect2D& GetScissor() { return m_scissor; }
+
+	VkCommandBuffer& GetCommandBuffer() { return m_commandBuffer; }
 };

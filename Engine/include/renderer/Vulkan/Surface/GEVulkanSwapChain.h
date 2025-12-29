@@ -48,4 +48,7 @@ public:
 	void Cleanup();
 
 	void SetRenderPass(GEVulkanRenderPass* renderPass) { m_renderPass = renderPass; }
+
+	VkFramebuffer GetFramebuffer(uint32_t index) { return m_vkFramebuffers[index].GetVkFramebuffer(); }
+	VkExtent2D GetSwapChainExtent() const { return m_vkExtent; }
 };

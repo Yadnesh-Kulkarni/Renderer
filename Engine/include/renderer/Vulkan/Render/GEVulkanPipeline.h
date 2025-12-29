@@ -31,4 +31,6 @@ public:
 
 	void CreatePipeline();
 	void Cleanup();
+
+	VkPipeline GetGraphicsPipeline() const { return m_pipeline; }
 };

@@ -10,6 +10,7 @@
 #include "renderer/Vulkan/Render/GEVulkanFrameContext.h"
 #include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
 #include "renderer/Vulkan/Render/GEVulkanPipeline.h"
+#include "renderer/Vulkan/core/GEVulkanCommandPool.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -29,8 +30,11 @@ private:
 	std::unique_ptr<GEVulkanFrameContext> frameContext;
 	std::unique_ptr<GEVulkanRenderPass> vkRenderPass;
 	std::unique_ptr<GEVulkanPipeline> vkPipeline;
+	std::unique_ptr<GEVulkanCommandPool> vkCommandPool;
 
     void CreateInstance();
+	void RecordCommands(uint32_t imageIndex);
+
 protected:
     virtual void BeginFrame();
     virtual void EndFrame();
