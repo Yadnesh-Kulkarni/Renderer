@@ -14,7 +14,9 @@ EngineCore::~EngineCore()
 
 void EngineCore::Run()
 {
-    window->createWindow(800, 600, "Vulkan window");
+    int width = 1280;
+	int height = 720;
+    window->createWindow(width, height, "Vulkan window");
 
     GERequiredExtensions extensionInfo;
     window->getRequiredExtensions(&extensionInfo);
