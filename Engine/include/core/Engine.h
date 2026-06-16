@@ -12,4 +12,7 @@ public:
     ~EngineCore();
     
     void Run();
+
+private:
+    void TestTaskFlow();
 };

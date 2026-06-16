@@ -49,6 +49,11 @@ target_include_directories(Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
 )
 
+target_include_directories(Engine
+    PRIVATE
+    ${CMAKE_SOURCE_DIR}/ThirdParty
+)
+
 target_compile_definitions(Engine
     PRIVATE
         $<$<CONFIG:Debug>:ENGINE_DEBUG>
@@ -73,8 +78,7 @@ target_link_libraries(TestApp
 target_include_directories(TestApp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
-)
-
+)   
 
 include_directories(${Vulkan_INCLUDE_DIRS})
 target_link_libraries(TestApp PRIVATE Vulkan::Vulkan)
