@@ -14,6 +14,9 @@ set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
 set(GLFW_VULKAN_STATIC  OFF CACHE BOOL "" FORCE)
 
+set(TF_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 # ── Read dependencies.json and declare all deps ───────────────────────────────
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.json" JSON_DATA)
 string(JSON ARRAY_LENGTH LENGTH "${JSON_DATA}")
@@ -31,10 +34,25 @@ foreach(IDX RANGE ${LOOP_MAX})
     )
 endforeach()
 
-FetchContent_MakeAvailable(glfw taskflow)
+FetchContent_MakeAvailable(glfw taskflow glm)
 
 # ── Vulkan ────────────────────────────────────────────────────────────────────
 find_package(Vulkan REQUIRED)
+
+# Locate shaderc from the Vulkan SDK (not exposed as a CMake target by find_package)
+if(DEFINED ENV{VULKAN_SDK})
+    set(VULKAN_SDK_PATH "$ENV{VULKAN_SDK}")
+else()
+    get_filename_component(VULKAN_SDK_PATH "${Vulkan_INCLUDE_DIRS}/.." ABSOLUTE)
+endif()
+
+add_library(shaderc_combined STATIC IMPORTED)
+set_target_properties(shaderc_combined PROPERTIES
+    IMPORTED_LOCATION         "${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib"
+    IMPORTED_LOCATION_DEBUG   "${VULKAN_SDK_PATH}/Lib/shaderc_combinedd.lib"
+    IMPORTED_LOCATION_RELEASE "${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib"
+    INTERFACE_INCLUDE_DIRECTORIES "${VULKAN_SDK_PATH}/Include"
+)
 
 option(BUILD_TESTS "Build the test suite" OFF)
 
@@ -49,6 +67,7 @@ file(GLOB_RECURSE ENGINE_SOURCES
     "Engine/include/renderer/Vulkan/Surface/*.h"
     "Engine/include/renderer/Vulkan/Resources/*.h"
     "Engine/include/renderer/Vulkan/common/*.h"
+    "Engine/include/renderer/OpenGL/core/*.h"
     "Engine/include/platform/*.h"
     "Engine/include/utils/*.h"
     "Engine/include/core/*.h"
@@ -56,9 +75,10 @@ file(GLOB_RECURSE ENGINE_SOURCES
     "Engine/src/math/*.cpp"
     "Engine/src/renderer/Vulkan/*.cpp"
     "Engine/src/renderer/Vulkan/core/*.cpp"
-    "Engine/src/renderer/Vulkan/Resources/*.cpp"
+    "Engine/src/renderer/Vulkan/Resource/*.cpp"
     "Engine/src/renderer/Vulkan/Surface/*.cpp"
     "Engine/src/renderer/Vulkan/Render/*.cpp"
+    "Engine/include/renderer/OpenGL/core/*.cpp"
     "Engine/src/renderer/*.cpp"
     "Engine/src/platform/*.cpp"
     "Engine/src/utils/*.cpp"
@@ -71,17 +91,20 @@ target_include_directories(Engine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Engine/include
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/ThirdParty
         ${taskflow_SOURCE_DIR}
+        ${glm_SOURCE_DIR}
 )
 
 target_link_libraries(Engine
     PUBLIC
         Vulkan::Vulkan
+        shaderc_combined
         glfw
 )
 
 target_compile_definitions(Engine
+    PUBLIC
+        ENGINE_SOURCE_DIR="${CMAKE_SOURCE_DIR}/"
     PRIVATE
         $<$<CONFIG:Debug>:ENGINE_DEBUG>
 )

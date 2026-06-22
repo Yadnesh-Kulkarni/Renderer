@@ -58,6 +58,15 @@ void WindowCreator::createWindow(int &width, int &height, const char* title)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
   });
+
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetFramebufferSizeCallback(m_window, FramebufferResizeCallback);
+}
+
+void WindowCreator::FramebufferResizeCallback(GLFWwindow* window, int, int)
+{
+    auto* self = static_cast<WindowCreator*>(glfwGetWindowUserPointer(window));
+    self->m_framebufferResized = true;
 }
 
 void WindowCreator::destroyWindow()

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
@@ -15,11 +16,11 @@ private:
 
 	std::unique_ptr<GEVulkanShader> m_vertexShader;
 	std::unique_ptr<GEVulkanShader> m_fragmentShader;
-	GEVulkanFrameContext m_frameContext;
-	GEVulkanRenderPass m_renderPass;
+	GEVulkanFrameContext& m_frameContext;
+	GEVulkanRenderPass& m_renderPass;
 public:
-	GEVulkanPipeline(VkDevice& device, GEVulkanFrameContext frameContext, GEVulkanRenderPass renderPass) : 
-		m_device(device), 
+	GEVulkanPipeline(VkDevice device, GEVulkanFrameContext& frameContext, GEVulkanRenderPass& renderPass)
+		: m_device(device),
 		m_frameContext(frameContext),
 		m_renderPass(renderPass)
 	{
@@ -29,8 +30,9 @@ public:
 
 	~GEVulkanPipeline() = default;
 
-	void CreatePipeline();
+	void CreatePipeline(const std::string& vertPath, const std::string& fragPath);
 	void Cleanup();
 
 	VkPipeline GetGraphicsPipeline() const { return m_pipeline; }
+	VkPipelineLayout GetPipelineLayout() const { return m_pipelineLayout; }
 };

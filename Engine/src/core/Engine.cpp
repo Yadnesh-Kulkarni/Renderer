@@ -23,15 +23,18 @@ void EngineCore::Run()
     window->createWindow(width, height, "Vulkan window");
 
     GERequiredExtensions extensionInfo;
-    window->getRequiredExtensions(&extensionInfo);
-	renderer->SetRequiredExtensions(&extensionInfo);
     renderer->Initialize();
 
     while(!window->shouldClose())
     {
         window->pollEvents();
+
+        renderer->BeginFrame();
+		renderer->DrawFrame();
+		renderer->EndFrame();
     }
 
+    renderer->WaitIdle();
     renderer->Cleanup();
 }
 

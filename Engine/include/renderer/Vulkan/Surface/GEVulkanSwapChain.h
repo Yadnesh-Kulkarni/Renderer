@@ -6,6 +6,7 @@
 #include "renderer/Vulkan/Resources/GEVulkanImageView.h"
 #include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
 #include "renderer/Vulkan/Resources/GEVulkanFramebuffer.h"
+#include "renderer/Vulkan/Resources/GEVulkanDepthImage.h"
 
 class GEVulkanSwapChain {
 private:
@@ -25,12 +26,14 @@ private:
 
 	std::vector<VkImage> m_vkSwapChainImages;
 	std::vector<GEVulkanImageView> m_vkSwapChainImageViews;
+	std::vector<GEVulkanDepthImage> m_depthImages;
 	std::vector<GEVulkanFramebuffer> m_vkFramebuffers;
 
 	void ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	void ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	void ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	void CreateImageViews(uint32_t imageCount);
+	void CreateDepthResources(VkFormat depthFormat);
 public:
 	GEVulkanSwapChain(GEVulkanPhysicalDevice* physicalDevice, GEVulkanLogicalDevice* logicalDevice, GEVulkanSurfaceView *surface,uint32_t width, uint32_t height) : 
 		m_physicalDevice(physicalDevice),
@@ -48,7 +51,10 @@ public:
 	void Cleanup();
 
 	void SetRenderPass(GEVulkanRenderPass* renderPass) { m_renderPass = renderPass; }
+	void SetDimensions(int width, int height) { m_width = width; m_height = height; }
 
 	VkFramebuffer GetFramebuffer(uint32_t index) { return m_vkFramebuffers[index].GetVkFramebuffer(); }
 	VkExtent2D GetSwapChainExtent() const { return m_vkExtent; }
+	VkSwapchainKHR GetVkSwapChain() const { return m_vkSwapChain; }
+	uint32_t GetImageCount() const { return static_cast<uint32_t>(m_vkSwapChainImages.size()); }
 };

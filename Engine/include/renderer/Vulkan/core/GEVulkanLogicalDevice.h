@@ -15,5 +15,6 @@ public:
 	void createLogicalDevice();
 	void cleanUp();
 	VkDevice& getVkDevice() { return m_vkDevice; }
-	VkQueue& getVkQueue() { return m_vkGraphicsQueue; }
+	VkQueue& getGraphicsQueue() { return m_vkGraphicsQueue; }
+	VkQueue& getPresentQueue() { return m_vkPresentQueue; }
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include <vulkan/vulkan.h>
 #include "renderer/Renderer.h"
 #include "renderer/Vulkan/core/GEVulkanValidationLayer.h"
@@ -19,6 +20,12 @@
 
 class VulkanRenderer : public Renderer{
 private:
+	uint32_t currentImageIndex = 0;
+	std::vector<VkFence> imagesInFlight;
+	std::vector<VkSemaphore> renderFinishedSemaphores;
+	bool frameReady = false;
+	float m_rotationAngle = 0.0f;
+
 	VkInstance vkInstance;
    
     GEVulkanValidationLayer vkValidationLayer;
@@ -33,11 +40,16 @@ private:
 	std::unique_ptr<GEVulkanCommandPool> vkCommandPool;
 
     void CreateInstance();
-	void RecordCommands(uint32_t imageIndex);
+	void RecordCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void CreateRenderFinishedSemaphores(uint32_t imageCount);
+	void DestroyRenderFinishedSemaphores();
+	void RecreateSwapChain();
 
 protected:
     virtual void BeginFrame();
     virtual void EndFrame();
+	virtual void DrawFrame();
+	virtual void WaitIdle();
 
     virtual void SwapBuffers();
 
@@ -49,5 +61,7 @@ public:
     virtual void Initialize();
 	virtual void Cleanup();
 
-	virtual void SetRequiredExtensions(GERequiredExtensions* pRequiredExtensions);
+	virtual void SetRequiredExtensions();
+
+	void SetRotationAngle(float angleDegrees) { m_rotationAngle = angleDegrees; }
 };

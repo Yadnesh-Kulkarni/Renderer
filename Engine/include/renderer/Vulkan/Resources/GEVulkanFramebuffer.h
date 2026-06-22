@@ -14,7 +14,7 @@ public:
 	GEVulkanFramebuffer() {};
 	~GEVulkanFramebuffer() = default;
 
-	void CreateFramebuffer(VkDevice device, VkExtent2D extent, VkRenderPass renderPass, VkImageView imageView);
+	void CreateFramebuffer(VkDevice device, VkExtent2D extent, VkRenderPass renderPass, VkImageView colorImageView, VkImageView depthImageView);
 	void Cleanup(VkDevice device);
 
 	VkFramebuffer GetVkFramebuffer() const { return m_vkFramebuffer; }

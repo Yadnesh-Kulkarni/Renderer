@@ -21,6 +21,7 @@ private:
 	};
 
 	SwapchainSupportDetails querySwapchainSupport(VkPhysicalDevice device);
+	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 public:
 	
     GEVulkanPhysicalDevice(const GEVulkanPhysicalDevice& other)
@@ -39,5 +40,7 @@ public:
 
 	const QueueFamilyIndices GetQueueFamilyIndices() { return m_deviceDetails.queueFamilyIndices; }
 	const SwapchainSupportDetails GetSwapchainSupportDetails() { return m_deviceDetails.swapchainSupportDetails; }
+	void RefreshSwapchainSupportDetails();
+	VkFormat FindDepthFormat();
 	void Cleanup();
 };

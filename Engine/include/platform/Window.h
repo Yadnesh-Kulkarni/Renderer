@@ -9,7 +9,11 @@
 class WindowCreator{
 private:
     GLFWwindow* m_window;
+    bool m_framebufferResized = false;
+    static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
 public:
+    bool WasResized() const { return m_framebufferResized; }
+    void ClearResizeFlag() { m_framebufferResized = false; }
        WindowCreator();
        ~WindowCreator() = default;
 
