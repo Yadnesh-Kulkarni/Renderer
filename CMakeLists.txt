@@ -17,6 +17,16 @@ set(GLFW_VULKAN_STATIC  OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+set(ASSIMP_BUILD_TESTS          OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES        OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL              OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS   OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+
+# Only enable formats you actually need
+set(ASSIMP_BUILD_OBJ_IMPORTER   ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER  ON CACHE BOOL "" FORCE)
+
 # ── Read dependencies.json and declare all deps ───────────────────────────────
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.json" JSON_DATA)
 string(JSON ARRAY_LENGTH LENGTH "${JSON_DATA}")
@@ -34,7 +44,12 @@ foreach(IDX RANGE ${LOOP_MAX})
     )
 endforeach()
 
-FetchContent_MakeAvailable(glfw taskflow glm)
+set(ASSIMP_BUILD_3DS_EXPORTER   OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS          OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS   OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL              OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(glfw taskflow glm assimp)
 
 # ── Vulkan ────────────────────────────────────────────────────────────────────
 find_package(Vulkan REQUIRED)
@@ -100,6 +115,7 @@ target_link_libraries(Engine
         Vulkan::Vulkan
         shaderc_combined
         glfw
+        assimp
 )
 
 target_compile_definitions(Engine

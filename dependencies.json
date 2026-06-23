@@ -1,0 +1,32 @@
+[
+    {
+    "name": "taskflow",
+    "source": 
+        {
+        "type": "git",
+        "url" : "https://github.com/taskflow/taskflow.git",
+        "revision": "v3.8.0"
+        }
+    },
+    {
+        "name": "glfw",
+        "source": {
+            "url": "https://github.com/glfw/glfw.git",
+            "revision": "3.4"
+        }
+    },
+    {
+    "name": "glm",
+    "source": {
+        "url": "https://github.com/g-truc/glm.git",
+        "revision": "1.0.1"
+    }
+    },
+    {
+    "name": "assimp",
+    "source": {
+        "url": "https://github.com/assimp/assimp.git",
+        "revision": "v5.3.1"
+    }
+}
+]
