@@ -1,5 +1,7 @@
 #include <cstdint>
+#include <array>
 #include "renderer/Vulkan/Render/GEVulkanPipeline.h"
+#include "renderer/Vulkan/common/GEVulkancommon.h"
 
 void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::string& fragPath,
 	VkPolygonMode polygonMode)
@@ -21,12 +23,16 @@ void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::st
 
 	VkPipelineShaderStageCreateInfo shaderStages[2] = { vertShaderStageInfo, fragShaderStageInfo};
 
+	VkVertexInputBindingDescription bindingDescription{};
+	std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+	GetMeshVertexInputDescriptions(bindingDescription, attributeDescriptions);
+
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputInfo.vertexBindingDescriptionCount = 0;
-	vertexInputInfo.pVertexBindingDescriptions = nullptr; 
-	vertexInputInfo.vertexAttributeDescriptionCount = 0;
-	vertexInputInfo.pVertexAttributeDescriptions = nullptr; 
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -58,8 +64,8 @@ void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::st
 
 	rasterizer.lineWidth = 1.0f;
 
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.cullMode = VK_CULL_MODE_NONE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 	const bool isWireframe = (polygonMode == VK_POLYGON_MODE_LINE);
 	rasterizer.depthBiasEnable         = isWireframe ? VK_TRUE  : VK_FALSE;

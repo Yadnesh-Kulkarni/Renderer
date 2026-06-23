@@ -41,6 +41,7 @@ public:
 	const QueueFamilyIndices GetQueueFamilyIndices() { return m_deviceDetails.queueFamilyIndices; }
 	const SwapchainSupportDetails GetSwapchainSupportDetails() { return m_deviceDetails.swapchainSupportDetails; }
 	void RefreshSwapchainSupportDetails();
-	VkFormat FindDepthFormat();
+	VkFormat ResolveDepthBufferFormat();
+	VkFormat FindDepthFormat() { return ResolveDepthBufferFormat(); }
 	void Cleanup();
 };

@@ -26,6 +26,8 @@ void GEVulkanDepthImage::Create(
 	VkExtent2D extent,
 	VkFormat format)
 {
+	m_format = format;
+
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -37,6 +39,7 @@ void GEVulkanDepthImage::Create(
 	imageInfo.format = format;
 	imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	// Attachment-only — not used for sampling (TextureUsageBits_Attachment equivalent).
 	imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -105,4 +108,6 @@ void GEVulkanDepthImage::Cleanup(VkDevice device)
 		vkFreeMemory(device, m_memory, nullptr);
 		m_memory = VK_NULL_HANDLE;
 	}
+
+	m_format = VK_FORMAT_UNDEFINED;
 }

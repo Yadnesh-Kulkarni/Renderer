@@ -12,6 +12,9 @@
 #include "renderer/Vulkan/Render/GEVulkanRenderPass.h"
 #include "renderer/Vulkan/Render/GEVulkanPipeline.h"
 #include "renderer/Vulkan/core/GEVulkanCommandPool.h"
+#include "renderer/Vulkan/Resources/GEVulkanBuffer.h"
+#include "renderer/Vulkan/common/GEVulkancommon.h"
+#include "utils/MeshLoader.h"
 
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -25,6 +28,7 @@ private:
 	std::vector<VkSemaphore> renderFinishedSemaphores;
 	bool frameReady = false;
 	float m_rotationAngle = 0.0f;
+	VkFormat m_depthFormat = VK_FORMAT_UNDEFINED;
 
 	VkInstance vkInstance;
    
@@ -39,6 +43,10 @@ private:
 	std::unique_ptr<GEVulkanPipeline> vkPipeline;
 	std::unique_ptr<GEVulkanPipeline> vkPipelineWireframe;
 	std::unique_ptr<GEVulkanCommandPool> vkCommandPool;
+	MeshLoader m_meshLoader;
+	GEVulkanBuffer m_vertexBuffer;
+	GEVulkanBuffer m_indexBuffer;
+	uint32_t m_indexCount = 0;
 
     void CreateInstance();
 	void RecordCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex);

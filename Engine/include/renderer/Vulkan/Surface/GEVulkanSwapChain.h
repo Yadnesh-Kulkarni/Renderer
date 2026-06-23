@@ -46,7 +46,7 @@ public:
 
 	VkFormat GetSwapChainImageFormat() const { return m_vkSurfaceFormat.format; }
 	void CreateSwapChain();
-	void CreateFramebuffers();
+	void CreateFramebuffers(VkFormat depthFormat);
 
 	void Cleanup();
 

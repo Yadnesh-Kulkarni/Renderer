@@ -124,9 +124,8 @@ void GEVulkanSwapChain::CreateDepthResources(VkFormat depthFormat)
 	}
 }
 
-void GEVulkanSwapChain::CreateFramebuffers()
+void GEVulkanSwapChain::CreateFramebuffers(VkFormat depthFormat)
 {
-	VkFormat depthFormat = m_physicalDevice->FindDepthFormat();
 	CreateDepthResources(depthFormat);
 
 	for (size_t i = 0; i < m_vkSwapChainImageViews.size(); i++)

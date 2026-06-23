@@ -9,12 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "renderer/Vulkan/core/GEVulkan.h"
+#include "utils/FileUtils.h"
 #include "GLFW/glfw3.h"
-
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/cimport.h>
-#include <assimp/version.h>
 
 void VulkanRenderer::CreateInstance()
 {
@@ -81,7 +77,7 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 
 	std::array<VkClearValue, 2> clearValues{};
 	clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-	clearValues[1].depthStencil = {1.0f, 0};
+	clearValues[1].depthStencil = { 1.0f, 0 };
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	renderPassInfo.pClearValues = clearValues.data();
 
@@ -92,8 +88,9 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	VkExtent2D extent = vkSwapChain->GetSwapChainExtent();
 	float aspect = static_cast<float>(extent.width) / static_cast<float>(extent.height);
 
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(m_rotationAngle), glm::vec3(0.0f, 1.0f, 1.0f));
-	glm::mat4 view  = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(m_rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 view  = glm::lookAt(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 proj  = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 1000.0f);
 	proj[1][1] *= -1.0f;
 
@@ -110,19 +107,24 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	CubePushConstants pushConstants{};
 	pushConstants.mvp = mvp;
 
-	// Draw filled cube
+	VkBuffer vertexBuffers[] = { m_vertexBuffer.GetBuffer() };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+	// Draw filled mesh
 	pushConstants.isWireframe = 0;
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetGraphicsPipeline());
 	vkCmdPushConstants(commandBuffer, vkPipeline->GetPipelineLayout(),
 		pushConstantStages, 0, pushConstantSize, &pushConstants);
-	vkCmdDraw(commandBuffer, 36, 1, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 
 	// Draw wireframe overlay
 	pushConstants.isWireframe = 1;
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineWireframe->GetGraphicsPipeline());
 	vkCmdPushConstants(commandBuffer, vkPipelineWireframe->GetPipelineLayout(),
 		pushConstantStages, 0, pushConstantSize, &pushConstants);
-	vkCmdDraw(commandBuffer, 36, 1, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 
 	vkCmdEndRenderPass(commandBuffer);
 
@@ -187,7 +189,7 @@ void VulkanRenderer::RecreateSwapChain()
 	vkPhysicalDevice->RefreshSwapchainSupportDetails();
 	vkSwapChain->SetDimensions(fbSize.width, fbSize.height);
 	vkSwapChain->CreateSwapChain();
-	vkSwapChain->CreateFramebuffers();
+	vkSwapChain->CreateFramebuffers(m_depthFormat);
 
 	imagesInFlight.assign(vkSwapChain->GetImageCount(), VK_NULL_HANDLE);
 	CreateRenderFinishedSemaphores(vkSwapChain->GetImageCount());
@@ -225,10 +227,15 @@ void VulkanRenderer::Initialize()
 	vkSwapChain = std::make_unique<GEVulkanSwapChain>(vkPhysicalDevice.get(), vkLogicalDevice.get() , vkSurfaceView.get(), fbSize.width, fbSize.height);
 	vkSwapChain->CreateSwapChain();
 
+	m_depthFormat = vkPhysicalDevice->ResolveDepthBufferFormat();
+	std::cout << "Depth buffer format: "
+	          << (m_depthFormat == DEPTH_BUFFER_PREFERRED_FORMAT ? "D32_SFLOAT (preferred)" : "hardware fallback")
+	          << "\n";
+
 	vkRenderPass = std::make_unique<GEVulkanRenderPass>(
 		vkLogicalDevice->getVkDevice(),
 		vkSwapChain->GetSwapChainImageFormat(),
-		vkPhysicalDevice->FindDepthFormat());
+		m_depthFormat);
 	vkRenderPass->CreateRenderPass();
 
 	frameContext = std::make_unique<GEVulkanFrameContext>(vkLogicalDevice->getVkDevice(),fbSize.width, fbSize.height);
@@ -240,7 +247,7 @@ void VulkanRenderer::Initialize()
 	vkPipelineWireframe->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag", VK_POLYGON_MODE_LINE);
 
 	vkSwapChain->SetRenderPass(vkRenderPass.get());
-	vkSwapChain->CreateFramebuffers();
+	vkSwapChain->CreateFramebuffers(m_depthFormat);
 
 	imagesInFlight.resize(vkSwapChain->GetImageCount(), VK_NULL_HANDLE);
 	CreateRenderFinishedSemaphores(vkSwapChain->GetImageCount());
@@ -249,6 +256,36 @@ void VulkanRenderer::Initialize()
 	vkCommandPool->CreateCommandPool(vkLogicalDevice->getVkDevice(), vkPhysicalDevice->GetQueueFamilyIndices().graphicsFamily.value());
 
 	frameContext->CreateCmdBuffers(vkCommandPool->GetCommandPool());
+
+	const std::string modelPath = FileUtils::ResolvePath("Models/rubber_duck/scene.gltf");
+	if (!m_meshLoader.LoadFromFile(modelPath))
+		throw std::runtime_error("Failed to load model: " + m_meshLoader.GetLastError());
+
+	std::cout << "Loaded rubber duck: " << m_meshLoader.GetVertices().size()
+	          << " vertices, " << m_meshLoader.GetIndices().size() << " indices\n";
+
+	const auto& vertices = m_meshLoader.GetVertices();
+	const auto& indices = m_meshLoader.GetIndices();
+
+	m_vertexBuffer.CreateDeviceLocalFromData(
+		vkPhysicalDevice->GetPhysicalDevice(),
+		vkLogicalDevice->getVkDevice(),
+		vkCommandPool->GetCommandPool(),
+		vkLogicalDevice->getGraphicsQueue(),
+		vertices.data(),
+		vertices.size() * sizeof(MeshVertex),
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+	m_indexBuffer.CreateDeviceLocalFromData(
+		vkPhysicalDevice->GetPhysicalDevice(),
+		vkLogicalDevice->getVkDevice(),
+		vkCommandPool->GetCommandPool(),
+		vkLogicalDevice->getGraphicsQueue(),
+		indices.data(),
+		indices.size() * sizeof(uint32_t),
+		VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+	m_indexCount = static_cast<uint32_t>(indices.size());
 }
 
 void VulkanRenderer::Cleanup()
@@ -256,6 +293,12 @@ void VulkanRenderer::Cleanup()
 	WaitIdle();
 
 	DestroyRenderFinishedSemaphores();
+
+	if (vkLogicalDevice)
+	{
+		m_vertexBuffer.Cleanup(vkLogicalDevice->getVkDevice());
+		m_indexBuffer.Cleanup(vkLogicalDevice->getVkDevice());
+	}
 
     if(vkCommandPool)
     {
