@@ -37,6 +37,7 @@ private:
 	std::unique_ptr<GEVulkanFrameContext> frameContext;
 	std::unique_ptr<GEVulkanRenderPass> vkRenderPass;
 	std::unique_ptr<GEVulkanPipeline> vkPipeline;
+	std::unique_ptr<GEVulkanPipeline> vkPipelineWireframe;
 	std::unique_ptr<GEVulkanCommandPool> vkCommandPool;
 
     void CreateInstance();

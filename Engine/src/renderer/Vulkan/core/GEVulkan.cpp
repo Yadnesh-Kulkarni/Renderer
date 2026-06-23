@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <cstdint>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -9,6 +10,11 @@
 
 #include "renderer/Vulkan/core/GEVulkan.h"
 #include "GLFW/glfw3.h"
+
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <assimp/version.h>
 
 void VulkanRenderer::CreateInstance()
 {
@@ -80,7 +86,6 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetGraphicsPipeline());
 	vkCmdSetViewport(commandBuffer, 0, 1, &frameContext->GetViewport());
 	vkCmdSetScissor(commandBuffer, 0, 1, &frameContext->GetScissor());
 
@@ -94,10 +99,31 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 
 	glm::mat4 mvp = proj * view * model;
 
-	vkCmdPushConstants(commandBuffer, vkPipeline->GetPipelineLayout(),
-		VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &mvp);
+	struct CubePushConstants {
+		glm::mat4 mvp;
+		int32_t isWireframe;
+	};
 
+	constexpr uint32_t pushConstantSize = static_cast<uint32_t>(sizeof(glm::mat4) + sizeof(int32_t));
+	const VkShaderStageFlags pushConstantStages = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	CubePushConstants pushConstants{};
+	pushConstants.mvp = mvp;
+
+	// Draw filled cube
+	pushConstants.isWireframe = 0;
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetGraphicsPipeline());
+	vkCmdPushConstants(commandBuffer, vkPipeline->GetPipelineLayout(),
+		pushConstantStages, 0, pushConstantSize, &pushConstants);
 	vkCmdDraw(commandBuffer, 36, 1, 0, 0);
+
+	// Draw wireframe overlay
+	pushConstants.isWireframe = 1;
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineWireframe->GetGraphicsPipeline());
+	vkCmdPushConstants(commandBuffer, vkPipelineWireframe->GetPipelineLayout(),
+		pushConstantStages, 0, pushConstantSize, &pushConstants);
+	vkCmdDraw(commandBuffer, 36, 1, 0, 0);
+
 	vkCmdEndRenderPass(commandBuffer);
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -208,7 +234,10 @@ void VulkanRenderer::Initialize()
 	frameContext = std::make_unique<GEVulkanFrameContext>(vkLogicalDevice->getVkDevice(),fbSize.width, fbSize.height);
 
 	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
-	vkPipeline->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag");
+	vkPipeline->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag", VK_POLYGON_MODE_FILL);
+
+	vkPipelineWireframe = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
+	vkPipelineWireframe->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag", VK_POLYGON_MODE_LINE);
 
 	vkSwapChain->SetRenderPass(vkRenderPass.get());
 	vkSwapChain->CreateFramebuffers();
@@ -232,6 +261,12 @@ void VulkanRenderer::Cleanup()
     {
 		vkCommandPool->Cleanup(vkLogicalDevice->getVkDevice());
         vkCommandPool.reset();
+	}
+
+    if(vkPipelineWireframe)
+    {
+		vkPipelineWireframe->Cleanup();
+		vkPipelineWireframe.reset();
 	}
 
     if(vkPipeline)

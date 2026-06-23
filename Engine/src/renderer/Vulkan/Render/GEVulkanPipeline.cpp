@@ -1,6 +1,8 @@
+#include <cstdint>
 #include "renderer/Vulkan/Render/GEVulkanPipeline.h"
 
-void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::string& fragPath)
+void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::string& fragPath,
+	VkPolygonMode polygonMode)
 {
 	m_vertexShader->CreateShaderModuleFromGLSL(vertPath, VK_SHADER_STAGE_VERTEX_BIT);
 	m_fragmentShader->CreateShaderModuleFromGLSL(fragPath, VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -52,17 +54,18 @@ void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::st
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterizer.polygonMode = polygonMode;
 
 	rasterizer.lineWidth = 1.0f;
 
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
-	rasterizer.depthBiasEnable = VK_FALSE;
-	rasterizer.depthBiasConstantFactor = 0.0f; 
-	rasterizer.depthBiasClamp = 0.0f; 
-	rasterizer.depthBiasSlopeFactor = 0.0f; 
+	const bool isWireframe = (polygonMode == VK_POLYGON_MODE_LINE);
+	rasterizer.depthBiasEnable         = isWireframe ? VK_TRUE  : VK_FALSE;
+	rasterizer.depthBiasConstantFactor = isWireframe ? -1.0f    : 0.0f;
+	rasterizer.depthBiasClamp          = 0.0f;
+	rasterizer.depthBiasSlopeFactor    = isWireframe ? -1.0f    : 0.0f;
 
 	VkPipelineMultisampleStateCreateInfo multisampling{};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -97,15 +100,15 @@ void GEVulkanPipeline::CreatePipeline(const std::string& vertPath, const std::st
 	VkPipelineDepthStencilStateCreateInfo depthStencil{};
 	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	depthStencil.depthTestEnable = VK_TRUE;
-	depthStencil.depthWriteEnable = VK_TRUE;
-	depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+	depthStencil.depthWriteEnable = isWireframe ? VK_FALSE : VK_TRUE;
+	depthStencil.depthCompareOp = isWireframe ? VK_COMPARE_OP_LESS_OR_EQUAL : VK_COMPARE_OP_LESS;
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.stencilTestEnable = VK_FALSE;
 
 	VkPushConstantRange pushConstantRange{};
-	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange.offset = 0;
-	pushConstantRange.size = sizeof(float) * 16; // mat4
+	pushConstantRange.size = sizeof(float) * 16 + sizeof(int32_t); // mat4 + isWireframe
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

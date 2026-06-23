@@ -2,6 +2,7 @@
 
 layout(push_constant) uniform PushConstants {
     mat4 mvp;
+    int isWireframe;
 } pc;
 
 layout(location = 0) out vec3 fragColor;
