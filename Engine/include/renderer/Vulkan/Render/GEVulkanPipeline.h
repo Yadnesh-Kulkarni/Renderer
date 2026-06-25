@@ -31,7 +31,7 @@ public:
 	~GEVulkanPipeline() = default;
 
 	void CreatePipeline(const std::string& vertPath, const std::string& fragPath,
-		VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL);
+		VkPolygonMode polygonMode, VkDescriptorSetLayout descriptorSetLayout);
 	void Cleanup();
 
 	VkPipeline GetGraphicsPipeline() const { return m_pipeline; }

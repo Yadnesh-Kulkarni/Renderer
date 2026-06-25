@@ -13,6 +13,8 @@
 #include "renderer/Vulkan/Render/GEVulkanPipeline.h"
 #include "renderer/Vulkan/core/GEVulkanCommandPool.h"
 #include "renderer/Vulkan/Resources/GEVulkanBuffer.h"
+#include "renderer/Vulkan/Resources/GEVulkanStagingDevice.h"
+#include "renderer/Vulkan/Resources/GEVulkanTexture.h"
 #include "renderer/Vulkan/common/GEVulkancommon.h"
 #include "utils/MeshLoader.h"
 
@@ -43,6 +45,9 @@ private:
 	std::unique_ptr<GEVulkanPipeline> vkPipeline;
 	std::unique_ptr<GEVulkanPipeline> vkPipelineWireframe;
 	std::unique_ptr<GEVulkanCommandPool> vkCommandPool;
+	std::unique_ptr<GEVulkanStagingDevice> m_stagingDevice;
+	GEVulkanTexture m_baseColorTexture;
+	VkDescriptorSetLayout m_textureDescriptorSetLayout = VK_NULL_HANDLE;
 	MeshLoader m_meshLoader;
 	GEVulkanBuffer m_vertexBuffer;
 	GEVulkanBuffer m_indexBuffer;

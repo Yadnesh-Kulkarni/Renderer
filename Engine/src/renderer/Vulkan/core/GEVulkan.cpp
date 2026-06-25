@@ -112,9 +112,13 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
+	const VkDescriptorSet textureDescriptorSet = m_baseColorTexture.GetDescriptorSet();
+
 	// Draw filled mesh
 	pushConstants.isWireframe = 0;
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->GetGraphicsPipeline());
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+		vkPipeline->GetPipelineLayout(), 0, 1, &textureDescriptorSet, 0, nullptr);
 	vkCmdPushConstants(commandBuffer, vkPipeline->GetPipelineLayout(),
 		pushConstantStages, 0, pushConstantSize, &pushConstants);
 	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
@@ -122,6 +126,8 @@ void VulkanRenderer::RecordCommands(VkCommandBuffer commandBuffer, uint32_t imag
 	// Draw wireframe overlay
 	pushConstants.isWireframe = 1;
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineWireframe->GetGraphicsPipeline());
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+		vkPipelineWireframe->GetPipelineLayout(), 0, 1, &textureDescriptorSet, 0, nullptr);
 	vkCmdPushConstants(commandBuffer, vkPipelineWireframe->GetPipelineLayout(),
 		pushConstantStages, 0, pushConstantSize, &pushConstants);
 	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
@@ -240,11 +246,15 @@ void VulkanRenderer::Initialize()
 
 	frameContext = std::make_unique<GEVulkanFrameContext>(vkLogicalDevice->getVkDevice(),fbSize.width, fbSize.height);
 
+	m_textureDescriptorSetLayout = GEVulkanTexture::CreateDescriptorSetLayout(vkLogicalDevice->getVkDevice());
+
 	vkPipeline = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
-	vkPipeline->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag", VK_POLYGON_MODE_FILL);
+	vkPipeline->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag",
+		VK_POLYGON_MODE_FILL, m_textureDescriptorSetLayout);
 
 	vkPipelineWireframe = std::make_unique<GEVulkanPipeline>(vkLogicalDevice->getVkDevice(), *frameContext, *vkRenderPass);
-	vkPipelineWireframe->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag", VK_POLYGON_MODE_LINE);
+	vkPipelineWireframe->CreatePipeline("App/Shaders/shader.vert", "App/Shaders/shader.frag",
+		VK_POLYGON_MODE_LINE, m_textureDescriptorSetLayout);
 
 	vkSwapChain->SetRenderPass(vkRenderPass.get());
 	vkSwapChain->CreateFramebuffers(m_depthFormat);
@@ -256,6 +266,13 @@ void VulkanRenderer::Initialize()
 	vkCommandPool->CreateCommandPool(vkLogicalDevice->getVkDevice(), vkPhysicalDevice->GetQueueFamilyIndices().graphicsFamily.value());
 
 	frameContext->CreateCmdBuffers(vkCommandPool->GetCommandPool());
+
+	m_stagingDevice = std::make_unique<GEVulkanStagingDevice>();
+	m_stagingDevice->Initialize(
+		vkPhysicalDevice->GetPhysicalDevice(),
+		vkLogicalDevice->getVkDevice(),
+		vkCommandPool->GetCommandPool(),
+		vkLogicalDevice->getGraphicsQueue());
 
 	const std::string modelPath = FileUtils::ResolvePath("Models/rubber_duck/scene.gltf");
 	if (!m_meshLoader.LoadFromFile(modelPath))
@@ -270,8 +287,7 @@ void VulkanRenderer::Initialize()
 	m_vertexBuffer.CreateDeviceLocalFromData(
 		vkPhysicalDevice->GetPhysicalDevice(),
 		vkLogicalDevice->getVkDevice(),
-		vkCommandPool->GetCommandPool(),
-		vkLogicalDevice->getGraphicsQueue(),
+		*m_stagingDevice,
 		vertices.data(),
 		vertices.size() * sizeof(MeshVertex),
 		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
@@ -279,11 +295,21 @@ void VulkanRenderer::Initialize()
 	m_indexBuffer.CreateDeviceLocalFromData(
 		vkPhysicalDevice->GetPhysicalDevice(),
 		vkLogicalDevice->getVkDevice(),
-		vkCommandPool->GetCommandPool(),
-		vkLogicalDevice->getGraphicsQueue(),
+		*m_stagingDevice,
 		indices.data(),
 		indices.size() * sizeof(uint32_t),
 		VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+	m_stagingDevice->WaitIdle();
+
+	const std::string texturePath = FileUtils::ResolvePath("Models/rubber_duck/textures/Duck_baseColor.png");
+	m_baseColorTexture.LoadFromFile(
+		vkPhysicalDevice->GetPhysicalDevice(),
+		vkLogicalDevice->getVkDevice(),
+		*m_stagingDevice,
+		m_textureDescriptorSetLayout,
+		texturePath);
+	std::cout << "Loaded texture: " << texturePath << "\n";
 
 	m_indexCount = static_cast<uint32_t>(indices.size());
 }
@@ -296,8 +322,16 @@ void VulkanRenderer::Cleanup()
 
 	if (vkLogicalDevice)
 	{
+		m_baseColorTexture.Cleanup(vkLogicalDevice->getVkDevice());
 		m_vertexBuffer.Cleanup(vkLogicalDevice->getVkDevice());
 		m_indexBuffer.Cleanup(vkLogicalDevice->getVkDevice());
+	}
+
+	if (m_stagingDevice)
+	{
+		m_stagingDevice->WaitIdle();
+		m_stagingDevice->Cleanup();
+		m_stagingDevice.reset();
 	}
 
     if(vkCommandPool)
@@ -316,6 +350,14 @@ void VulkanRenderer::Cleanup()
     {
 		vkPipeline->Cleanup();
 		vkPipeline.reset();
+	}
+
+	if (vkLogicalDevice && m_textureDescriptorSetLayout != VK_NULL_HANDLE)
+	{
+		GEVulkanTexture::DestroyDescriptorSetLayout(
+			vkLogicalDevice->getVkDevice(),
+			m_textureDescriptorSetLayout);
+		m_textureDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
     if(frameContext)

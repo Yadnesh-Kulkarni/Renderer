@@ -108,6 +108,7 @@ target_include_directories(Engine
     PRIVATE
         ${taskflow_SOURCE_DIR}
         ${glm_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Engine/third-party
 )
 
 target_link_libraries(Engine
